@@ -13,14 +13,19 @@ import {
 import { format } from 'date-fns'
 import { BarChart2 } from 'lucide-react'
 
-interface DataPoint {
+interface EngagementDataPoint {
   date: string
   engagement_rate: number
   views: number
 }
 
+interface GrowthDataPoint {
+  date: string
+  followers: number
+}
+
 interface EngagementChartProps {
-  data: DataPoint[]
+  data: EngagementDataPoint[] | GrowthDataPoint[]
   platform: string
 }
 
@@ -73,6 +78,10 @@ export default function EngagementChart({ data, platform }: EngagementChartProps
     })(),
   }))
 
+  const isGrowthData =
+    formattedData.length > 0 &&
+    !('engagement_rate' in formattedData[0])
+
   return (
     <div className="glass-card p-6">
       <h3 className="text-sm font-semibold text-white/70 mb-4 flex items-center gap-2">
@@ -98,47 +107,68 @@ export default function EngagementChart({ data, platform }: EngagementChartProps
             axisLine={false}
             tickLine={false}
           />
-          <YAxis
+                  <YAxis
             yAxisId="left"
             tick={{ fill: '#64748b', fontSize: 11 }}
             axisLine={false}
             tickLine={false}
-            tickFormatter={(v) => `${v}%`}
+            tickFormatter={(v) =>
+              isGrowthData ? (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v) : `${v}%`
+            }
             width={40}
           />
-          <YAxis
-            yAxisId="right"
-            orientation="right"
-            tick={{ fill: '#64748b', fontSize: 11 }}
-            axisLine={false}
-            tickLine={false}
-            tickFormatter={(v) => (v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v)}
-            width={50}
-          />
+          {!isGrowthData && (
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tick={{ fill: '#64748b', fontSize: 11 }}
+              axisLine={false}
+              tickLine={false}
+              tickFormatter={(v) =>
+                v >= 1000 ? `${(v / 1000).toFixed(0)}K` : v
+              }
+              width={50}
+            />
+          )}
           <Tooltip content={<CustomTooltip />} />
           <Legend
             wrapperStyle={{ fontSize: '12px', color: '#64748b', paddingTop: '12px' }}
           />
-          <Area
-            yAxisId="left"
-            type="monotone"
-            dataKey="engagement_rate"
-            stroke="#6366f1"
-            strokeWidth={2}
-            fill="url(#gradientEngagement)"
-            dot={false}
-            activeDot={{ r: 4, fill: '#6366f1' }}
-          />
-          <Area
-            yAxisId="right"
-            type="monotone"
-            dataKey="views"
-            stroke="#06b6d4"
-            strokeWidth={2}
-            fill="url(#gradientViews)"
-            dot={false}
-            activeDot={{ r: 4, fill: '#06b6d4' }}
-          />
+          {formattedData.length > 0 && 'engagement_rate' in formattedData[0] ? (
+            <>
+              <Area
+                yAxisId="left"
+                type="monotone"
+                dataKey="engagement_rate"
+                stroke="#6366f1"
+                strokeWidth={2}
+                fill="url(#gradientEngagement)"
+                dot={false}
+                activeDot={{ r: 4, fill: '#6366f1' }}
+              />
+              <Area
+                yAxisId="right"
+                type="monotone"
+                dataKey="views"
+                stroke="#06b6d4"
+                strokeWidth={2}
+                fill="url(#gradientViews)"
+                dot={false}
+                activeDot={{ r: 4, fill: '#06b6d4' }}
+              />
+            </>
+          ) : (
+            <Area
+              yAxisId="left"
+              type="monotone"
+              dataKey="followers"
+              stroke="#22c55e"
+              strokeWidth={2}
+              fill="url(#gradientEngagement)"
+              dot={false}
+              activeDot={{ r: 4, fill: '#22c55e' }}
+            />
+          )}
         </AreaChart>
       </ResponsiveContainer>
     </div>

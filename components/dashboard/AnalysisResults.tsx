@@ -23,12 +23,17 @@ interface Props {
   jobId?: string
 }
 
-export function AnalysisResults({ result }: Props) {
-  const isPost =
+function isPostResult(
+  result: PostAnalysisResult | ProfileAnalysisResult
+): result is PostAnalysisResult {
+  return (
     'type' in result &&
     ['video', 'shorts', 'reel', 'post'].includes(result.type)
+  )
+}
 
-  const metrics = result.metrics
+export function AnalysisResults({ result }: Props) {
+  const isPost = isPostResult(result)
 
   const thumbnail = isPost
     ? result.metadata?.thumbnail_url
@@ -84,25 +89,25 @@ export function AnalysisResults({ result }: Props) {
           <>
             <KPICard
               title="Views"
-              value={metrics.views || 0}
+              value={result.metrics.views || 0}
               icon={<Eye />}
               color="cyan"
             />
             <KPICard
               title="Likes"
-              value={metrics.likes || 0}
+              value={result.metrics.likes || 0}
               icon={<Heart />}
               color="purple"
             />
             <KPICard
               title="Comments"
-              value={metrics.comments || 0}
+              value={result.metrics.comments || 0}
               icon={<MessageCircle />}
               color="indigo"
             />
             <KPICard
               title="Engagement Rate"
-              value={metrics.engagement_rate || 0}
+              value={result.metrics.engagement_rate || 0}
               unit="%"
               icon={<TrendingUp />}
               color="green"
@@ -112,26 +117,26 @@ export function AnalysisResults({ result }: Props) {
           <>
             <KPICard
               title="Followers"
-              value={metrics.followers || 0}
+              value={result.metrics.followers || 0}
               icon={<Users />}
               color="cyan"
             />
             <KPICard
               title="Avg Views"
-              value={metrics.avg_views || 0}
+              value={result.metrics.avg_views || 0}
               icon={<Eye />}
               color="purple"
             />
             <KPICard
               title="Avg Engagement"
-              value={metrics.avg_engagement_rate || 0}
+              value={result.metrics.avg_engagement_rate || 0}
               unit="%"
               icon={<Heart />}
               color="indigo"
             />
             <KPICard
               title="Posts / Week"
-              value={metrics.posting_frequency || 0}
+              value={result.metrics.posting_frequency || 0}
               icon={<Activity />}
               color="green"
             />
@@ -155,7 +160,7 @@ export function AnalysisResults({ result }: Props) {
         <div className="glass-card p-6 flex flex-col items-center justify-center">
           {isPost ? (
             <ViralityGauge
-              score={metrics.virality_score || 0}
+              score={result.metrics.virality_score || 0}
             />
           ) : (
             <div className="w-full h-full flex flex-col justify-center">
